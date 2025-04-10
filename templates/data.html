@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .centered {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+ </style>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <img src="{{image_url}}" class="card-img-top">
+        <div class="card-body text-center">
+          <h5 class="card-title">Data</h5>
+          <p class="card-text">Choose an option to process the image:</p>
+          <button type="button" id="detect" class="btn btn-primary mr-2" onclick="detectPhoto()">Detect</button>
+ 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="captureAlert" class="alert" role="alert" style="display: none;"></div>
+<div id="json_data"></div>
+<script>
+let detectButton = document.getElementById('detect');
+let isButtonEnabled = true;
+
+function enableDetectButton() {
+	isButtonEnabled = true;
+	detectButton.disabled = false;
+	
+	}
+
+function detectPhoto() {
+	if (!isButtonEnabled) {
+		return;
+	}
+
+	detectButton.disabled = true;
+	isButtonEnabled = false;
+	const alertElement = document.getElementById('captureAlert');
+
+	fetch('/yolo', {
+		method: 'POST',
+		headers: {
+            'Content-Type': 'application/json'
+        }
+	})
+	.then(response => response.json())
+	.then(data => {
+		console.log(data);
+		document.getElementById('json_data').innerHTML = JSON.stringify(data);
+        enableDetectButton();
+		alertElement.className = 'alert alert-success'
+		alertElement.textContent = 'Image classified successfully'
+
+		enableDetectButton();
+	});
+	alertElement.style.display = 'block';
+
+	setTimeout(() => {
+		alertElement.style.display = 'none';
+		document.getElementById('json_data').innerHTML = ''
+	}, 5000);
+}
+
+</script>
+{% endblock %}
